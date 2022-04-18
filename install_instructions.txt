@@ -1,0 +1,2 @@
+./install.sh
+congrats flatman will be compiled and installed!
