@@ -5,19 +5,17 @@ flatpak first install script
 requirements: pacman, flatpak
 Package install_command format "pacman -S []"
  */
-use std::process::{Command, ExitStatus, Output};
-use std::{str, default, io};
-use std::fs::File;
-use std::io::{Write, Read};
+use std::process::{Command, ExitStatus};
+use std::{str, io};
+use std::io::Write;
 use std::collections::HashMap;
 
+
 struct PackageType{
-    priority: u32,
     name: String,
     query_command: String,
     install_command: String,
     remove_command: String,
-    refresh_command: String,
     update_all_command: String,
 }
 
@@ -34,14 +32,6 @@ impl Package<'_>{
         let install_command = format!("{} {} {}", install_command_vec[0], self.name, install_command_vec[1]);
         println!("{}", install_command);
         return install_command;
-    }
-
-    fn build_search_command(&self) -> String{
-        let query_command_split = self.packagetype.query_command.split(" [] ");
-        let query_command_vec: Vec<&str> = query_command_split.collect();
-        let query_command = format!("{} {} {}", query_command_vec[0], self.name, query_command_vec[1]);
-        println!("{}", query_command);
-        return query_command;
     }
 
     fn build_remove_command(&self) -> String{
@@ -89,7 +79,7 @@ flatman $package - same as flatman search
 }
 
 
-fn update_all_packages(packagetypes: &[PackageType; 3]){
+fn update_all_packages(packagetypes: &[PackageType; 2]){
     let mut reboot_recommended = false;
     print!("
 ***************************** UPDATING ALL PACKAGES PLEASE BE PATIENT **********************************
@@ -118,16 +108,6 @@ fn update_all_packages(packagetypes: &[PackageType; 3]){
         ")
     }
 }
-
-
-fn save_list_of_packages(packages: Vec<Package>){
-    /*let package_list_file = File::create("/usr/share/flatman/package_list.txt").expect("Failed to create package list file");
-    for package in packages{
-        let outline = format!("{} {}", package.name, package.packagetype);
-        writeln!(&mut package_list_file), outline;
-    }*/
-    println!("Coming soon");
-} 
 
 
 fn list_and_select_packages(packagelist:&Vec<Package>, command: &String){
@@ -161,32 +141,12 @@ Name |   Repository
                 Err(e) => panic!("invalid utf8 {}", e)
             };
             print!("{}", outputstring);
-            /*
-            if package_to_install.packagetype.name == "flatpak".to_string(){
-                let output = Command::new("bash").arg("-c").arg(install_command).output().expect("Failed to run install command");
-                let outputstring = match str::from_utf8(&output.stdout){
-                    Ok(v) => v,
-                    Err(e) => panic!("invalid utf8 {}", e)
-                };
-                let outputstring_split = outputstring.split("\n");
-                let output_vec: Vec<&str> = outputstring_split.collect();
-                let mut flatpak_count = 0;
-                for line in output_vec{
-                    flatpak_count = flatpak_count + 1;
-                    let package_com_format_split = line.split("/");
-                    let package_com_format_vec: Vec<&str> = package_com_format_split.collect();
-                    if package_com_format_vec.len() != 1{
-                        let package_com_format = package_com_format_vec[1];
-                        println!("{} {}", flatpak_count, package_com_format);
-                    }
-                }
-            }*/
         }
     }
 }
 
 
-fn single_package_function(command: &String, name: &String, packagetypes: &[PackageType; 3]){
+fn single_package_function(command: &String, name: &String, packagetypes: &[PackageType; 2]){
     let package_list = search_and_build_package(name, packagetypes);
     match command.as_str(){
         "install" => if package_list.len() > 1 {list_and_select_packages(&package_list, &command);}
@@ -197,7 +157,7 @@ fn single_package_function(command: &String, name: &String, packagetypes: &[Pack
 }
 
 
-fn search_and_build_package<'a>(name: &String, packagetypes: &'a [PackageType; 3])-> Vec<Package<'a>>{
+fn search_and_build_package<'a>(name: &String, packagetypes: &'a [PackageType; 2])-> Vec<Package<'a>>{
     let lower_name = name.to_lowercase();
     let mut packages: Vec<Package> = Vec::new();
     for packagetype in packagetypes{
@@ -250,35 +210,22 @@ fn search_and_build_package<'a>(name: &String, packagetypes: &'a [PackageType; 3
 
 
 fn main() {
-    let pacman = PackageType{priority: 2,
+    let pacman = PackageType{
         name: "pacman".to_string(),
-        query_command: "pacman -Ss [] ".to_string(),
-        install_command: "sudo pacman -S [] ".to_string(),
-        remove_command: "sudo pacman -Rs [] ".to_string(),
-        refresh_command: "sudo pacman -Sy".to_string(),
-        update_all_command: "sudo pacman -Syu --noconfirm".to_string(),
+        query_command: "paru -Ss [] ".to_string(),
+        install_command: "paru -S [] ".to_string(),
+        remove_command: "paru -Rs [] ".to_string(),
+        update_all_command: "paru -Syu --noconfirm".to_string(),
     };
 
     let flatpak = PackageType{
-        priority: 1,
         name: "flatpak".to_string(),
         query_command: "flatpak search --columns=name,application id  [] ".to_string(),
         install_command: "flatpak install --noninteractive [] ".to_string(),
         remove_command: "flatpak remove --noninteractive [] ".to_string(),
-        refresh_command: "echo 'non_needed'".to_string(),
         update_all_command: "flatpak update -y".to_string(),
     };
-    
-    let aur = PackageType{
-        priority: 3,
-        name: "AUR".to_string(),
-        query_command: "to don [] ".to_string(),
-        install_command: "to do [] ".to_string(),
-        remove_command: "to do [] ".to_string(),
-        refresh_command: "to do".to_string(),
-        update_all_command: "echo 'todo'".to_string(),
-    };
-    let packagetypes: [PackageType; 3] = [pacman, flatpak, aur];
+    let packagetypes: [PackageType; 2] = [pacman, flatpak];
     let args: Vec<String> = std::env::args().collect();
     match args.len(){
         1 => default_action(),
