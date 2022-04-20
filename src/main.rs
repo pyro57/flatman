@@ -220,7 +220,7 @@ fn main() {
 
     let flatpak = PackageType{
         name: "flatpak".to_string(),
-        query_command: "flatpak search --columns=name,application  [] ".to_string(),
+        query_command: "flatpak search --columns=name,application [] ".to_string(),
         install_command: "flatpak install --noninteractive [] ".to_string(),
         remove_command: "flatpak remove --noninteractive [] ".to_string(),
         update_all_command: "flatpak update -y".to_string(),
