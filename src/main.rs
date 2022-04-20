@@ -212,15 +212,15 @@ fn search_and_build_package<'a>(name: &String, packagetypes: &'a [PackageType; 2
 fn main() {
     let pacman = PackageType{
         name: "pacman".to_string(),
-        query_command: "paru -Ss [] ".to_string(),
-        install_command: "paru -S [] ".to_string(),
-        remove_command: "paru -Rs [] ".to_string(),
+        query_command: "paru -Ss  [] ".to_string(),
+        install_command: "paru -S  [] ".to_string(),
+        remove_command: "paru -Rs  [] ".to_string(),
         update_all_command: "paru -Syu --noconfirm".to_string(),
     };
 
     let flatpak = PackageType{
         name: "flatpak".to_string(),
-        query_command: "flatpak search --columns=name,application id  [] ".to_string(),
+        query_command: "flatpak search --columns=name,application  [] ".to_string(),
         install_command: "flatpak install --noninteractive [] ".to_string(),
         remove_command: "flatpak remove --noninteractive [] ".to_string(),
         update_all_command: "flatpak update -y".to_string(),
