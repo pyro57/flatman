@@ -213,8 +213,8 @@ fn main() {
     let pacman = PackageType{
         name: "pacman".to_string(),
         query_command: "paru -Ss  [] ".to_string(),
-        install_command: "paru -S  [] ".to_string(),
-        remove_command: "paru -Rs  [] ".to_string(),
+        install_command: "paru -S [] --noconfirm".to_string(),
+        remove_command: "paru -Rs  []  --noconfirm".to_string(),
         update_all_command: "paru -Syu --noconfirm".to_string(),
     };
 
